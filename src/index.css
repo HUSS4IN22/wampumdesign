@@ -29,3 +29,28 @@ body {
   --theme-text: '#333333'
   --theme-dark-text: '#1e3d59' 
 }
+
+
+
+.wampum-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), 1fr);
+    grid-template-rows: repeat(var(--grid-rows), var(--bead-height));
+    gap: var(--bead-gap);
+}
+
+/* Individual Bead Styling (Tubular/Cylindrical Look) */
+.bead {
+    width: 100%;
+    height: 100%;
+    border-width: 0.5px;
+    border-style: solid;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    background-image: radial-gradient(
+        circle at 50% 30%,
+        rgba(255, 255, 255, 0.4) 15%,
+        rgba(0, 0, 0, 0.1) 60%,
+        rgba(0, 0, 0, 0.05) 80%
+    );
+}
