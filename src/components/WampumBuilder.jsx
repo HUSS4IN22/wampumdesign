@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Bead from './Bead';
 
 const wampumDimensions = {
-    rows: 10,
-    columns: 100, 
+    rows: 15,
+    columns: 175, 
 };
 
 const BEAD_WIDTH_PX = 3; 
@@ -44,8 +44,8 @@ export default function WampumBuilder() {
     };
 
     return (
-        <div className="w-full min-h-screen flex flex-col items-center justify-center bg-theme-light-bg text-theme-text p-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-theme-deep-blue">
+        <div className="w-full flex flex-col items-center bg-theme-light-bg text-theme-text px-8">
+            <h2 className="text-3xl md:text-4xl font-light mb-6 text-theme-deep-blue">
                 Weave Your Understanding: Create Wampum Belt Designs
             </h2>
 
