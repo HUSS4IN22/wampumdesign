@@ -1,7 +1,16 @@
+import { useState } from "react"
+import Bead from "./Bead"
+
+
+const wampumDimensions = {
+    rows:10,
+    columns: 200,
+}
+
+
 export default function WampumBuilder() {
     return (
-        <section className='h-screen w-full flex justify-center bg-[#051923]'>
-            <h1 className="text-8xl font-thin text-center text-[#EFFAD1] mt-14">Online Wampum Builder</h1>
-        </section>
-    )
+        <div>
+        </div>
+    )   
 }

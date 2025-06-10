@@ -1,12 +1,12 @@
 import './App.css'
-import Header from './components/Header.jsx'
-import WampumBuilder from './components/WampumBuilder.jsx'
+import Header from './sections/header.jsx'
+import WampumBuilderSection from './sections/WampumBuilderSection.jsx'
 
 function App() {
 return (
   <div>
     <Header/>
-    <WampumBuilder/>
+    <WampumBuilderSection/>
   </div>
 )
 }
