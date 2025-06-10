@@ -36,7 +36,7 @@ body {
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), 1fr);
     grid-template-rows: repeat(var(--grid-rows), auto);
-    gap: var(--bead-gap);
+    gap: var(--bead-row-gap) var(--bead-column-gap);
 }
 
 /* Individual Bead Styling (Tubular/Cylindrical Look) */
@@ -47,11 +47,44 @@ body {
     border-style: solid;
     cursor: pointer;
     transition: background-color 0.1s ease;
-    background-image: radial-gradient(
-        circle at 50% 30%,
-        rgba(255, 255, 255, 0.4) 15%,
-        rgba(0, 0, 0, 0.1) 60%,
-        rgba(0, 0, 0, 0.05) 80%
-    );
     aspect-ratio: 1 / 3.5;
+}
+
+.bead-gradient-white {
+  background-image: radial-gradient(
+        circle at 50% 50%,                 /* Light source directly in the center */
+        #FFFFFF 0%,                       /* Pure white brightest point */
+        #F8F8F8 15%,                       /* Fades to very light off-white */
+        #E0E0E0 50%,                       /* Mid-range light grey, creating curvature */
+        #C0C0C0 100%                       /* Darker grey at the outer edges for depth */
+    );
+}
+
+.bead-gradient-purple {
+    background-image: radial-gradient(
+        circle at 50% 50%,                 /* Light source directly in the center */
+        #A06ECF 0%,                        /* Lighter purple for the central highlight */
+        #8A5DBF 15%,                       /* Fades slightly to a medium-light purple */
+        #5D2B8B 50%,                       /* Transitions to the base purple */
+        #3A165C 100%                       /* Darkest purple at the outer edges for depth */
+    );
+}
+
+
+/* @media (min-width: 1024px) and (max-width: 1200px) {
+    .wampum-grid {
+        min-width: calc(
+            (var(--grid-cols) * var(--bead-width)) +
+            ((var(--grid-cols) - 1) * var(--bead-column-gap)) +
+            (2 * 1rem) +
+            (2 * 2px)
+        );
+        grid-template-columns: repeat(var(--grid-cols), var(--bead-width));
+    }
+} */
+
+@media (min-width: 200px) and (max-width: 960px) {
+    .wampum-grid {
+        grid-template-columns: repeat(var(--grid-cols), minmax(var(--bead-width), 1fr));
+    }
 }
