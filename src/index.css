@@ -9,3 +9,23 @@ body {
   color: #f3f9d2;
   overflow-x: hidden;
 }
+
+
+@theme {
+  --wampum-white: #f0f0f0;
+  --wampum-white-border: #CCCCCC;
+  --wampum-purple: '#5d2b8b'
+  --wampum-purple-border: '#4a2072'
+  --wampum-light-purple: '#9c7cbf'
+  --wampum-light-purple-border: '#8a60aa'
+  --wampum-dark-purple: '#3a1b5a'
+  --wampum-dark-purple-border: '#2b1040'
+
+  --theme-light-blue: '#C4D7e0'
+  --theme-light-green: '#A7D9B9'
+  --theme-deep-blue: '#1e3d59'
+  --theme-dark-green: '#87bba2'
+  --theme-light-bg: '#e0f2f7'
+  --theme-text: '#333333'
+  --theme-dark-text: '#1e3d59' 
+}
