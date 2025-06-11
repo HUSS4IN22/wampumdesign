@@ -205,13 +205,13 @@ export default function WampumBuilder() {
                 </button>
                 <button
                     onClick={handleSaveButtonClick}
-                    className="py-2 px-4 rounded-md font-semibold bg-green-500 text-white hover:bg-green-600 transition-colors duration-200 ease-in-out"
+                    className="py-2 px-4 rounded-md font-semibold bg-[#bbd8b3] text-[#051923] hover:bg-[#051923] hover:text-[#bbd8b3] hover:border-2 hover:border-[#effad1] transition-colors duration-200 ease-in-out"
                 >
                     Save Belt
                 </button>
                 <button
                     onClick={handleLoadButtonClick}
-                    className="py-2 px-4 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ease-in-out"
+                    className="py-2 px-4 rounded-md font-semibold bg-[#42858c] text-[#effad1] hover:bg-[#effad1] hover:text-[#42858c] hover:border-2 hover:border-[#effad1] transition-colors duration-200 ease-in-out"
                 >
                     Load Belt
                 </button>
