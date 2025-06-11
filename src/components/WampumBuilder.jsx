@@ -1,20 +1,19 @@
-
-import React, { useState, useEffect, useRef, useCallback} from 'react'; 
+import React, { useState, useEffect, useRef, useCallback} from 'react';
 import Bead from './Bead';
 
 const wampumDimensions = {
     rows: 10,
-    columns: 150, 
+    columns: 150,
 };
 
-const BEAD_WIDTH_PX = 8; 
-const BEAD_HEIGHT_PX = 24; 
+const BEAD_WIDTH_PX = 8;
+const BEAD_HEIGHT_PX = 24;
 const BEAD_ROW_GAP_PX = 3;
 const BEAD_COLUMN_GAP_PX = 1.5;
 
 const BEAD_COLORS = {
-    'white': 'bead-gradient-white',
-    'purple': 'bead-gradient-purple',
+    'white': 'bead-gradient-white border-wampum-white-border',
+    'purple': 'bead-gradient-purple border-wampum-purple-border',
     'light-purple': 'bg-wampum-light-purple border-wampum-light-purple-border',
     'dark-purple': 'bg-wampum-dark-purple border-wampum-dark-purple-border',
 };
@@ -25,60 +24,39 @@ export default function WampumBuilder() {
     );
     const [isDragging, setIsDragging] = useState(false);
     const [brushMode, setBrushMode] = useState('paint');
+    const [statusMessage, setStatusMessage] = useState('');
 
-    const gridRef = useRef(null); 
+    const gridRef = useRef(null);
+    const beadsRef = useRef(beads);
 
-    const getActiveColor = useCallback(() => {
-        return brushMode === 'paint' ? 'purple':'white';
-    }, [brushMode]);
-    
-    const colorBead = useCallback((startIndex) => {
-        setBeads(prevBeads => {
-            const newBeads = [...prevBeads];
-            const colorToApply = getActiveColor();
-            
-            if (newBeads[startIndex] !== colorToApply) {
-                newBeads[startIndex] = colorToApply;
-                return newBeads
+    useEffect(() => {
+        beadsRef.current = beads;
+    }, [beads]);
+
+    useEffect(() => {
+        try {
+            const savedBeadsJson = localStorage.getItem('wampumBelt');
+            if (savedBeadsJson) {
+                const savedData = JSON.parse(savedBeadsJson);
+                if (savedData.beads && savedData.dimensions &&
+                    savedData.beads.length === wampumDimensions.rows * wampumDimensions.columns &&
+                    savedData.dimensions.rows === wampumDimensions.rows &&
+                    savedData.dimensions.columns === wampumDimensions.columns) {
+                    setBeads(savedData.beads);
+                    setStatusMessage("Belt loaded from your browser's storage!");
+                } else {
+                    setBeads(Array(wampumDimensions.rows * wampumDimensions.columns).fill('white'));
+                    setStatusMessage("Loaded belt had different dimensions or invalid data. Starting fresh.");
+                }
+            } else {
+                setStatusMessage("No saved belt found in browser. Start drawing!");
             }
-            return prevBeads;
-        })
-    }, [getActiveColor]);
-    
-
-
-    const handleMouseDown = useCallback(()=> {
-        setIsDragging(true);
-        console.log("Dragging")
-    }, []);
-    
-    const handleMouseUp = useCallback(()=> {
-        setIsDragging(false);
-        console.log("Not Dragging")
-    }, []);
-
-    const handleMouseLeave = useCallback(()=> {
-        setIsDragging(false);
-        console.log("Not Dragging")
-    }, []);
-
-
-    const handleBeadClick = useCallback((index) => {
-            colorBead(index);
-            console.log("Dragging")
-    }, [colorBead]);
-
-    const handleBeadMouseEnter = useCallback((index) => {
-        if (isDragging) {
-            colorBead(index);
-            console.log("Dragging")
+        } catch (e) {
+            console.error("Error loading from local storage on mount:", e);
+            setStatusMessage(`Error loading belt: ${e.message}.`);
         }
-    }, [colorBead, isDragging]);
+    }, []); 
 
-    const getButtonClasses = (mode) => {
-        return `py-2 px-4 rounded-full font-semibold transition-colors duration-200 ease-in-out ${brushMode === mode ? 'bg-[#effad1] text-[#051923] shadow-md border-2 border-[#effad1]' : 'bg-[#082637] text-[#effad1] hover:bg-[#effad1] hover:text-[#082637] text-xs'}`
-    }
-    
     useEffect(() => {
         if (gridRef.current) {
             gridRef.current.style.setProperty('--grid-rows', wampumDimensions.rows);
@@ -88,29 +66,136 @@ export default function WampumBuilder() {
             gridRef.current.style.setProperty('--bead-row-gap', `${BEAD_ROW_GAP_PX}px`);
             gridRef.current.style.setProperty('--bead-column-gap', `${BEAD_COLUMN_GAP_PX}px`);
         }
-    }, []); 
+    }, []);
 
+    const getActiveColor = useCallback(() => {
+        return brushMode === 'paint' ? 'purple':'white';
+    }, [brushMode]);
+
+    const saveBeadsToLocalStorage = useCallback(() => {
+        try {
+            const dataToSave = {
+                beads: beadsRef.current,
+                dimensions: wampumDimensions,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('wampumBelt', JSON.stringify(dataToSave));
+            setStatusMessage("Belt saved automatically to your browser!");
+        } catch (e) {
+            console.error("Error saving to local storage:", e);
+            setStatusMessage(`Error saving: ${e.message}. Storage might be full.`);
+        }
+    }, []);
+
+    const colorBead = useCallback((startIndex) => {
+        setBeads(prevBeads => {
+            const newBeads = [...prevBeads];
+            const colorToApply = getActiveColor();
+
+            if (newBeads[startIndex] !== colorToApply) {
+                newBeads[startIndex] = colorToApply;
+                return newBeads
+            }
+            return prevBeads;
+        })
+    }, [getActiveColor]);
+
+
+    const handleMouseDown = useCallback(()=> {
+        setIsDragging(true);
+    }, []);
+
+    const handleMouseUp = useCallback(()=> {
+        setIsDragging(false);
+        saveBeadsToLocalStorage();
+    }, [saveBeadsToLocalStorage]);
+
+    const handleMouseLeave = useCallback(()=> {
+        if (isDragging) {
+            setIsDragging(false);
+            saveBeadsToLocalStorage();
+        }
+    }, [isDragging, saveBeadsToLocalStorage]);
+
+
+    const handleBeadClick = useCallback((index) => {
+        colorBead(index);
+        setTimeout(() => {
+            saveBeadsToLocalStorage();
+        }, 0);
+    }, [colorBead, saveBeadsToLocalStorage]);
+
+
+    const handleBeadMouseEnter = useCallback((index) => {
+        if (isDragging) {
+            colorBead(index);
+        }
+    }, [colorBead, isDragging]);
+
+    const getButtonClasses = (mode) => {
+        return `py-2 px-4 rounded-full font-semibold transition-colors duration-200 ease-in-out ${brushMode === mode ? 'bg-[#effad1] text-[#051923] shadow-md border-2 border-[#effad1]' : 'bg-[#082637] text-[#effad1] hover:bg-[#effad1] hover:text-[#082637] text-xs'}`
+    }
+
+    useEffect(() => {
+        if (gridRef.current) {
+            gridRef.current.style.setProperty('--grid-rows', wampumDimensions.rows);
+            gridRef.current.style.setProperty('--grid-cols', wampumDimensions.columns);
+            gridRef.current.style.setProperty('--bead-width', `${BEAD_WIDTH_PX}px`);
+            gridRef.current.style.setProperty('--bead-height', `${BEAD_HEIGHT_PX}px`);
+            gridRef.current.style.setProperty('--bead-row-gap', `${BEAD_ROW_GAP_PX}px`);
+            gridRef.current.style.setProperty('--bead-column-gap', `${BEAD_COLUMN_GAP_PX}px`);
+        }
+    }, []);
+
+    const handleSaveButtonClick = useCallback(() => {
+        saveBeadsToLocalStorage(); 
+        setStatusMessage("Belt explicitly saved!"); 
+    }, [saveBeadsToLocalStorage]); 
+
+    const handleLoadButtonClick = useCallback(() => {
+        try {
+            const savedBeadsJson = localStorage.getItem('wampumBelt');
+            if (savedBeadsJson) {
+                const savedData = JSON.parse(savedBeadsJson);
+                if (savedData.beads && savedData.dimensions &&
+                    savedData.beads.length === wampumDimensions.rows * wampumDimensions.columns &&
+                    savedData.dimensions.rows === wampumDimensions.rows &&
+                    savedData.dimensions.columns === wampumDimensions.columns) {
+                    setBeads(savedData.beads);
+                    setStatusMessage("Belt reloaded from browser storage!");
+                } else {
+                    setStatusMessage("No compatible belt found to reload.");
+                }
+            } else {
+                setStatusMessage("No saved belt found in browser to reload.");
+            }
+        } catch (e) {
+            console.error("Error reloading from local storage via button:", e);
+            setStatusMessage(`Error reloading belt: ${e.message}.`);
+        }
+    }, []);
 
 
     return (
-        <div className="w-flex flex-col items-center bg-[#051923] text-theme-text px-2">
+        <div id="wampum-builder-section" className="w-full flex flex-col items-center bg-[#051923] text-theme-text px-2 pb-8">
             <h2 className="text-sm xs:text-md sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-light mb-6 text-theme-deep-blue text-center">
-                Weave Your Understanding: Create Wampum Belt Designs
+                Create Your Wampum Belt Designs
             </h2>
-            <div className="mb-4 flex justify-center space-x-4">
+
+            <div className="mb-4 flex flex-wrap justify-center space-x-2 sm:space-x-4">
                 <div className='flex space-x-4 px-3 py-2 border-2 border-[#effad1] rounded-full'>
-                <button
-                    onClick={() => setBrushMode('paint')}
-                    className={getButtonClasses('paint')}
-                >
-                    Paint (Purple)
-                </button>
-                <button
-                    onClick={() => setBrushMode('erase')}
-                    className={getButtonClasses('erase')}
-                >
-                    Erase (White)
-                </button>
+                    <button
+                        onClick={() => setBrushMode('paint')}
+                        className={getButtonClasses('paint')}
+                    >
+                        Paint (Purple)
+                    </button>
+                    <button
+                        onClick={() => setBrushMode('erase')}
+                        className={getButtonClasses('erase')}
+                    >
+                        Erase (White)
+                    </button>
                 </div>
                 <button
                     onClick={() => setBeads(Array(wampumDimensions.rows * wampumDimensions.columns).fill('white'))}
@@ -118,11 +203,29 @@ export default function WampumBuilder() {
                 >
                     Reset Belt
                 </button>
+                <button
+                    onClick={handleSaveButtonClick}
+                    className="py-2 px-4 rounded-md font-semibold bg-green-500 text-white hover:bg-green-600 transition-colors duration-200 ease-in-out"
+                >
+                    Save Belt
+                </button>
+                <button
+                    onClick={handleLoadButtonClick}
+                    className="py-2 px-4 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 ease-in-out"
+                >
+                    Load Belt
+                </button>
             </div>
+
+            {statusMessage && (
+                <div className="text-sm mb-3 text-gray-400">
+                    {statusMessage}
+                </div>
+            )}
 
             <div className="w-full max-w-full overflow-x-auto p-2 border border-[#23061b] rounded-lg bg-[#340928] shadow-lg">
                 <div
-                    className="wampum-grid lg:w-full grid gap-px border-2 border-[#23061b] bg-[#9b6a6c] p-0.5 select-none overflow-x-auto"
+                    className="wampum-grid grid gap-px border-2 border-[#23061b] bg-[#9b6a6c] p-0.5 select-none"
                     ref={gridRef}
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}
@@ -130,10 +233,10 @@ export default function WampumBuilder() {
                 >
                     {beads.map((color, index) => (
                         <Bead
-                            key={index} 
+                            key={index}
                             beadClasses={BEAD_COLORS[color]}
-                            onClick={() => handleBeadClick(index)} 
-                            onMouseEnter={() => handleBeadMouseEnter(index)} 
+                            onClick={() => handleBeadClick(index)}
+                            onMouseEnter={() => handleBeadMouseEnter(index)}
                         />
                     ))}
                 </div>
@@ -185,11 +288,11 @@ export default function WampumBuilder() {
 // }, [])
 
 // const handleBeadClick = (index) => {
-//     console.log(`Clicked bead at index: ${index}`)
+//     
 // }
 
 // const handleBeadMouseEnter = (index) => {
-//     console.log(`Mouse entered bead at index: ${index}`)
+//     
 // }
 
 
